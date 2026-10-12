@@ -1,0 +1,1191 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Enterprise Support Tracker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --surface-alt: #f1f3f7;
+    --fg: #0f1117;
+    --fg-muted: #6b7280;
+    --fg-faint: #9ca3af;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+
+    --ok: #16a34a;
+    --ok-bg: #f0fdf4;
+    --ok-border: #bbf7d0;
+    --warn: #d97706;
+    --warn-bg: #fffbeb;
+    --warn-border: #fde68a;
+    --crit: #dc2626;
+    --crit-bg: #fef2f2;
+    --crit-border: #fecaca;
+    --neutral: #4b5563;
+    --neutral-bg: #f9fafb;
+    --neutral-border: #e5e7eb;
+    --closed: #6366f1;
+    --closed-bg: #eef2ff;
+    --closed-border: #c7d2fe;
+    --escalated: #9333ea;
+    --escalated-bg: #faf5ff;
+    --escalated-border: #e9d5ff;
+    --accent: #2563eb;
+    --accent-bg: #eff6ff;
+
+    --radius: 10px;
+    --radius-sm: 6px;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1117; --surface: #161b22; --surface-alt: #1c2330;
+      --fg: #e6edf3; --fg-muted: #8b949e; --fg-faint: #484f58;
+      --border: #30363d; --border-strong: #444c56;
+      --ok: #3fb950; --ok-bg: #0d2217; --ok-border: #1a5632;
+      --warn: #d29922; --warn-bg: #1f1a0e; --warn-border: #4d3a0a;
+      --crit: #f85149; --crit-bg: #210d0d; --crit-border: #6b1b1b;
+      --neutral: #8b949e; --neutral-bg: #161b22; --neutral-border: #30363d;
+      --closed: #818cf8; --closed-bg: #1a1b3a; --closed-border: #3730a3;
+      --escalated: #c084fc; --escalated-bg: #1e1025; --escalated-border: #6b21a8;
+      --accent: #58a6ff; --accent-bg: #0d1f3c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1117; --surface: #161b22; --surface-alt: #1c2330;
+    --fg: #e6edf3; --fg-muted: #8b949e; --fg-faint: #484f58;
+    --border: #30363d; --border-strong: #444c56;
+    --ok: #3fb950; --ok-bg: #0d2217; --ok-border: #1a5632;
+    --warn: #d29922; --warn-bg: #1f1a0e; --warn-border: #4d3a0a;
+    --crit: #f85149; --crit-bg: #210d0d; --crit-border: #6b1b1b;
+    --neutral: #8b949e; --neutral-bg: #161b22; --neutral-border: #30363d;
+    --closed: #818cf8; --closed-bg: #1a1b3a; --closed-border: #3730a3;
+    --escalated: #c084fc; --escalated-bg: #1e1025; --escalated-border: #6b21a8;
+    --accent: #58a6ff; --accent-bg: #0d1f3c;
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--fg);
+    margin: 0;
+    min-height: 100%;
+  }
+
+  /* ── Header ── */
+  .header {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-block: 14px;
+    flex-wrap: wrap;
+  }
+
+  .header-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+  }
+
+  .header-title span { color: var(--fg-muted); font-weight: 400; }
+
+  .header-subtitle {
+    font-size: 11px;
+    color: var(--fg-faint);
+    letter-spacing: 0.01em;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip {
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .stat-chip.ok   { background: var(--ok-bg);       color: var(--ok);       border: 1px solid var(--ok-border); }
+  .stat-chip.warn { background: var(--warn-bg);      color: var(--warn);     border: 1px solid var(--warn-border); }
+  .stat-chip.crit { background: var(--crit-bg);      color: var(--crit);     border: 1px solid var(--crit-border); }
+  .stat-chip.esc  { background: var(--escalated-bg); color: var(--escalated);border: 1px solid var(--escalated-border); }
+
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  .btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--fg);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .btn:hover { background: var(--surface-alt); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { opacity: 0.9; }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── Admin mode banner ── */
+  .admin-banner {
+    background: var(--accent-bg);
+    border-bottom: 1px solid var(--accent);
+    padding: 6px 24px;
+  }
+  .admin-banner-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .admin-banner-text {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .admin-lock-btn {
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+  }
+
+  /* ── System note bar ── */
+  .system-note {
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--border);
+    padding: 7px 24px;
+  }
+  .system-note-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .note-item {
+    font-size: 11.5px;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .note-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .note-dot.notion  { background: #6b7280; }
+  .note-dot.slack   { background: #4a154b; }
+  .note-dot.jira    { background: #0052cc; }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    max-width: 1100px;
+    margin: 20px auto 0;
+    padding: 0 24px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .filter-btn {
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--fg-muted);
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+  .filter-btn:hover,
+  .filter-btn.active {
+    background: var(--accent-bg);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── Main ── */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 24px 48px;
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+  .card-stripe { height: 3px; width: 100%; }
+  .card-stripe.ok        { background: var(--ok); }
+  .card-stripe.warn      { background: var(--warn); }
+  .card-stripe.crit      { background: var(--crit); }
+  .card-stripe.closed    { background: var(--closed); }
+  .card-stripe.escalated { background: var(--escalated); }
+  .card-stripe.pending   { background: var(--neutral); }
+
+  .card-body {
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px 24px;
+    align-items: start;
+  }
+
+  .card-left { min-width: 0; }
+  .card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+
+  .company-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .badge.pre-sales { background: var(--accent-bg); color: var(--accent); }
+  .badge.post-sale { background: var(--ok-bg); color: var(--ok); }
+
+  .domain-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--surface-alt);
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+  }
+
+  .question {
+    font-size: 13.5px;
+    color: var(--fg);
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+
+  .meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-size: 12px;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .meta-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--fg-faint);
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* ── SLA clock ── */
+  .sla-block { text-align: right; }
+
+  .countdown {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .countdown.ok        { color: var(--ok); }
+  .countdown.warn      { color: var(--warn); }
+  .countdown.crit      { color: var(--crit); }
+  .countdown.closed    { color: var(--closed); }
+  .countdown.escalated { color: var(--escalated); }
+  .countdown.pending   { color: var(--fg-muted); }
+
+  .sla-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .status-pill {
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .status-pill.ok        { background: var(--ok-bg);       color: var(--ok);       border: 1px solid var(--ok-border); }
+  .status-pill.warn      { background: var(--warn-bg);      color: var(--warn);     border: 1px solid var(--warn-border); }
+  .status-pill.crit      { background: var(--crit-bg);      color: var(--crit);     border: 1px solid var(--crit-border); }
+  .status-pill.closed    { background: var(--closed-bg);    color: var(--closed);   border: 1px solid var(--closed-border); }
+  .status-pill.escalated { background: var(--escalated-bg); color: var(--escalated);border: 1px solid var(--escalated-border); }
+  .status-pill.pending   { background: var(--neutral-bg);   color: var(--neutral);  border: 1px solid var(--neutral-border); }
+
+  .card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* ── Progress bar ── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    transition: width 1s linear;
+  }
+  .progress-fill.ok        { background: var(--ok); }
+  .progress-fill.warn      { background: var(--warn); }
+  .progress-fill.crit      { background: var(--crit); }
+  .progress-fill.closed    { background: var(--closed); }
+  .progress-fill.escalated { background: var(--escalated); }
+  .progress-fill.pending   { background: var(--fg-faint); }
+
+  /* ── Legend ── */
+  .legend {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-top: 28px;
+  }
+  .legend-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .legend-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .legend-note {
+    font-size: 11px;
+    color: var(--fg-faint);
+  }
+  .legend-rows { display: flex; flex-direction: column; gap: 8px; }
+  .legend-row { display: flex; align-items: flex-start; gap: 12px; }
+  .legend-stripe {
+    width: 3px;
+    height: 36px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .legend-stripe.ok        { background: var(--ok); }
+  .legend-stripe.warn      { background: var(--warn); }
+  .legend-stripe.crit      { background: var(--crit); }
+  .legend-stripe.escalated { background: var(--escalated); }
+  .legend-text { min-width: 0; }
+  .legend-threshold {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg);
+  }
+  .legend-desc {
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
+  /* ── Empty state ── */
+  .empty {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--fg-muted);
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; }
+  .empty h3 { font-size: 16px; font-weight: 600; color: var(--fg); margin: 0 0 6px; }
+  .empty p { font-size: 13px; margin: 0; line-height: 1.6; }
+
+  /* ── PIN modal ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 520px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 6px;
+  }
+  .modal-desc {
+    font-size: 13px;
+    color: var(--fg-muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .form-grid { display: flex; flex-direction: column; gap: 14px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    letter-spacing: 0.02em;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.1s;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 72px; }
+  .field-error {
+    font-size: 12px;
+    color: var(--crit);
+    margin-top: 2px;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  /* ── Readonly overlay on cards ── */
+  .readonly-hint {
+    font-size: 11px;
+    color: var(--fg-faint);
+    font-style: italic;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .header-inner { gap: 10px; }
+    .card-body { grid-template-columns: 1fr; }
+    .card-right { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+    .form-row { grid-template-columns: 1fr; }
+    .main { padding: 16px 16px 48px; }
+    .filter-bar { padding: 0 16px; }
+    .header, .admin-banner, .system-note { padding: 0 16px; }
+    .admin-banner, .system-note { padding: 6px 16px; }
+  }
+</style>
+
+<script>
+  const SLA = {
+    acknowledge: 4 * 60,
+    answer:      8 * 60,
+    resolve:     16 * 60,
+    escalate:    36 * 60,
+    ceo:         48 * 60,
+  };
+
+  // Admin PIN — change this before sharing
+  const ADMIN_PIN = '2610';
+
+  let isAdmin = false;
+
+  function now() { return Date.now(); }
+
+  let requests = [];
+
+  function seedRequests() {
+    const base = now();
+    requests = [
+      {
+        id: 'req-001',
+        company: 'Pfizer BD',
+        type: 'pre-sales',
+        domain: 'R&D',
+        question: 'Can FEP+ handle covalent inhibitor workflows, or is the platform limited to non-covalent binding modes?',
+        owner: 'Richard Johnson',
+        sme: 'Hayk Saribekyan',
+        notionUrl: '',
+        postedAt: new Date(base - 2.5 * 60 * 60 * 1000).toISOString(),
+        status: 'acknowledged',
+        acknowledgedAt: new Date(base - 2.1 * 60 * 60 * 1000).toISOString(),
+        answeredAt: null, resolvedAt: null, escalatedAt: null,
+        etaDate: new Date(base + 5 * 60 * 60 * 1000).toISOString(),
+        urgency: 'elevated',
+        target: SLA.answer,
+      },
+      {
+        id: 'req-002',
+        company: 'Merck MSD',
+        type: 'post-sale',
+        domain: 'Product',
+        question: 'The RBFE calculation on our flagged compounds is returning a RMSE value 2× higher than the benchmark. Is there a known accuracy regression in the latest platform update?',
+        owner: 'Richard Johnson',
+        sme: 'Srinivas Gorur-Shandilya',
+        notionUrl: '',
+        postedAt: new Date(base - 1.1 * 60 * 60 * 1000).toISOString(),
+        status: 'pending',
+        acknowledgedAt: null, answeredAt: null, resolvedAt: null, escalatedAt: null, etaDate: null,
+        urgency: 'elevated',
+        target: SLA.acknowledge,
+      },
+      {
+        id: 'req-003',
+        company: 'Novartis CPB',
+        type: 'pre-sales',
+        domain: 'Engineering',
+        question: 'What is the GPU memory requirement per concurrent FEP+ job, and does DO Studio support reservation of a dedicated GPU pool per organization?',
+        owner: 'Richard Johnson',
+        sme: 'Alison Chicoria',
+        notionUrl: '',
+        postedAt: new Date(base - 7.8 * 60 * 60 * 1000).toISOString(),
+        status: 'acknowledged',
+        acknowledgedAt: new Date(base - 7.5 * 60 * 60 * 1000).toISOString(),
+        answeredAt: null, resolvedAt: null, escalatedAt: null,
+        etaDate: new Date(base + 0.5 * 60 * 60 * 1000).toISOString(),
+        urgency: 'standard',
+        target: SLA.answer,
+      },
+      {
+        id: 'req-004',
+        company: 'AstraZeneca',
+        type: 'post-sale',
+        domain: 'Commercial',
+        question: 'Are there multi-seat academic pricing options for a joint computational lab program, or only commercial licensing?',
+        owner: 'Richard Johnson',
+        sme: 'Natalie Ma',
+        notionUrl: '',
+        postedAt: new Date(base - 3 * 60 * 1000).toISOString(),
+        status: 'pending',
+        acknowledgedAt: null, answeredAt: null, resolvedAt: null, escalatedAt: null, etaDate: null,
+        urgency: 'standard',
+        target: SLA.acknowledge,
+      },
+      {
+        id: 'req-005',
+        company: 'Relay Therapeutics',
+        type: 'post-sale',
+        domain: 'R&D',
+        question: 'We need a benchmark comparison of Deep Origin FEP vs. Schrödinger FEP+ for Eg5 motor protein. Can you provide or guide us to an existing head-to-head?',
+        owner: 'Richard Johnson',
+        sme: 'Tigran Abramyan',
+        notionUrl: '',
+        postedAt: new Date(base - 41 * 60 * 60 * 1000).toISOString(),
+        status: 'escalated',
+        acknowledgedAt: new Date(base - 40.5 * 60 * 60 * 1000).toISOString(),
+        answeredAt: null, resolvedAt: null,
+        escalatedAt: new Date(base - 5 * 60 * 60 * 1000).toISOString(),
+        etaDate: new Date(base + 3 * 60 * 60 * 1000).toISOString(),
+        urgency: 'elevated',
+        target: SLA.resolve,
+      },
+      {
+        id: 'req-006',
+        company: 'Recursion Pharma',
+        type: 'pre-sales',
+        domain: 'R&D',
+        question: 'Does the platform support HPC cluster integration via SLURM, or only proprietary cloud compute?',
+        owner: 'Richard Johnson',
+        sme: 'Andrew Mochalskyy',
+        notionUrl: '',
+        postedAt: new Date(base - 22 * 60 * 60 * 1000).toISOString(),
+        status: 'answered',
+        acknowledgedAt: new Date(base - 21.6 * 60 * 60 * 1000).toISOString(),
+        answeredAt: new Date(base - 14 * 60 * 60 * 1000).toISOString(),
+        resolvedAt: null, escalatedAt: null, etaDate: null,
+        urgency: 'standard',
+        target: SLA.resolve,
+      },
+    ];
+  }
+
+  seedRequests();
+
+  // ── Time helpers ──────────────────────────────────────────────
+  function elapsedMinutes(iso) { return (now() - new Date(iso).getTime()) / 60000; }
+  function minutesUntil(iso)   { return (new Date(iso).getTime() - now()) / 60000; }
+
+  function formatCountdown(minutes) {
+    const neg = minutes < 0;
+    const abs = Math.abs(minutes);
+    const h = Math.floor(abs / 60);
+    const m = Math.floor(abs % 60);
+    const str = h > 0 ? `${h}h ${String(m).padStart(2,'0')}m` : `${m}m`;
+    return neg ? `-${str}` : str;
+  }
+
+  function clockColor(elapsed, target) {
+    const pct = elapsed / target;
+    if (pct < 0.5) return 'ok';
+    if (pct < 0.8) return 'warn';
+    return 'crit';
+  }
+
+  function slaInfo(req) {
+    if (req.status === 'resolved')   return { label: 'Resolved',       minutes: 0,                              color: 'closed',    pct: 1 };
+    if (req.status === 'answered')   return { label: 'Awaiting close',  minutes: req.target - elapsedMinutes(req.answeredAt), color: 'closed', pct: Math.min(elapsedMinutes(req.answeredAt) / req.target, 1) };
+    if (req.status === 'escalated')  { const e = elapsedMinutes(req.postedAt); return { label: 'Escalated', minutes: SLA.ceo - e, color: 'escalated', pct: Math.min(e / SLA.ceo, 1) }; }
+    if (req.status === 'acknowledged') {
+      const e = elapsedMinutes(req.postedAt);
+      return { label: 'Answer due', minutes: req.target - e, color: clockColor(e, req.target), pct: Math.min(e / req.target, 1) };
+    }
+    const e = elapsedMinutes(req.postedAt);
+    return { label: 'ACK due', minutes: SLA.acknowledge - e, color: clockColor(e, SLA.acknowledge), pct: Math.min(e / SLA.acknowledge, 1) };
+  }
+
+  function statusLabel(s) {
+    return { pending: 'Pending', acknowledged: 'Acknowledged', answered: 'Answered', escalated: 'Escalated', resolved: 'Resolved' }[s] || s;
+  }
+
+  function relativeDate(iso) {
+    const m = elapsedMinutes(iso);
+    if (m < 60) return `${Math.floor(m)}m ago`;
+    if (m < 24*60) return `${Math.floor(m/60)}h ago`;
+    return `${Math.floor(m/(24*60))}d ago`;
+  }
+
+  // ── State ─────────────────────────────────────────────────────
+  let filterStatus = 'all';
+  let modalMode = null; // 'pin' | 'new' | 'edit' | 'pin-for-new' | 'pin-for-edit'
+  let editingId = null;
+
+  // ── Render ────────────────────────────────────────────────────
+  function renderCard(req) {
+    const info = slaInfo(req);
+    const ct   = formatCountdown(info.minutes);
+    const pct  = Math.min(Math.round(info.pct * 100), 100);
+
+    const actions = isAdmin
+      ? `<div class="card-actions">
+           <button class="btn" onclick="openEditModal('${req.id}')" style="font-size:12px;padding:5px 10px">Update</button>
+           ${req.status !== 'resolved' ? `<button class="btn" onclick="markResolved('${req.id}')" style="font-size:12px;padding:5px 10px">Close</button>` : ''}
+         </div>`
+      : `<span class="readonly-hint">Read-only</span>`;
+
+    const notionLink = req.notionUrl
+      ? `<span class="meta-item"><span class="meta-dot"></span><a href="${req.notionUrl}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-size:12px">Notion ↗</a></span>`
+      : '';
+
+    return `
+      <div class="card" id="card-${req.id}">
+        <div class="card-stripe ${info.color}"></div>
+        <div class="card-body">
+          <div class="card-left">
+            <div class="card-top">
+              <span class="company-name">${req.company}</span>
+              <span class="badge ${req.type === 'pre-sales' ? 'pre-sales' : 'post-sale'}">${req.type}</span>
+              <span class="domain-badge">${req.domain}</span>
+              ${req.urgency === 'elevated' ? `<span class="badge" style="background:var(--crit-bg);color:var(--crit);border:1px solid var(--crit-border)">Elevated</span>` : ''}
+            </div>
+            <div class="question">${req.question}</div>
+            <div class="meta">
+              <span class="meta-item">Owner: <strong>${req.owner}</strong></span>
+              <span class="meta-item"><span class="meta-dot"></span>SME: ${req.sme}</span>
+              <span class="meta-item"><span class="meta-dot"></span>Posted ${relativeDate(req.postedAt)}</span>
+              ${req.acknowledgedAt ? `<span class="meta-item"><span class="meta-dot"></span>ACK'd ${relativeDate(req.acknowledgedAt)}</span>` : ''}
+              ${req.etaDate ? `<span class="meta-item"><span class="meta-dot"></span>ETA: ${minutesUntil(req.etaDate) < 0 ? '<span style="color:var(--crit)">overdue</span>' : formatCountdown(minutesUntil(req.etaDate))}</span>` : ''}
+              ${notionLink}
+            </div>
+          </div>
+          <div class="card-right">
+            <div class="sla-block">
+              <div class="countdown ${info.color}">${ct}</div>
+              <div class="sla-label">${info.label}</div>
+            </div>
+            <span class="status-pill ${info.color}">${statusLabel(req.status)}</span>
+            ${actions}
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill ${info.color}" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }
+
+  function filtered() {
+    if (filterStatus === 'all')  return requests;
+    if (filterStatus === 'open') return requests.filter(r => !['resolved','answered'].includes(r.status));
+    return requests.filter(r => r.status === filterStatus);
+  }
+
+  function renderStats() {
+    const open     = requests.filter(r => r.status !== 'resolved').length;
+    const atRisk   = requests.filter(r => { if (['resolved','answered'].includes(r.status)) return false; return slaInfo(r).color === 'warn'; }).length;
+    const breached = requests.filter(r => { if (['resolved','answered'].includes(r.status)) return false; return slaInfo(r).color === 'crit'; }).length;
+    const esc      = requests.filter(r => r.status === 'escalated').length;
+
+    document.getElementById('stat-open').textContent   = `${open} open`;
+    document.getElementById('stat-risk').textContent   = `${atRisk} at risk`;
+    document.getElementById('stat-breach').textContent = `${breached} breached`;
+    document.getElementById('stat-esc').textContent    = `${esc} escalated`;
+
+    document.getElementById('stat-risk-chip').hidden   = atRisk === 0;
+    document.getElementById('stat-breach-chip').hidden = breached === 0;
+    document.getElementById('stat-esc-chip').hidden    = esc === 0;
+  }
+
+  function updateAdminUI() {
+    document.getElementById('admin-banner').hidden = !isAdmin;
+    document.getElementById('admin-new-btn').hidden = !isAdmin;
+    document.getElementById('admin-lock-prompt').hidden = isAdmin;
+  }
+
+  function render() {
+    renderStats();
+    updateAdminUI();
+    const list = filtered();
+    const container = document.getElementById('cards-container');
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty"><div class="empty-icon">✓</div><h3>All clear</h3><p>No requests match this filter.</p></div>`;
+      return;
+    }
+    const order = { escalated: 0, crit: 1, warn: 2, ok: 3, closed: 4 };
+    list.sort((a,b) => (order[slaInfo(a).color] ?? 5) - (order[slaInfo(b).color] ?? 5));
+    container.innerHTML = list.map(renderCard).join('');
+  }
+
+  setInterval(render, 30000);
+
+  // ── Filters ──────────────────────────────────────────────────
+  function setFilter(f) {
+    filterStatus = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+    render();
+  }
+
+  // ── Admin auth ───────────────────────────────────────────────
+  function requestAdminAccess() {
+    modalMode = 'pin';
+    document.getElementById('pin-error').textContent = '';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('modal-overlay').hidden = false;
+    document.getElementById('modal-pin').hidden = false;
+    document.getElementById('modal-form').hidden = true;
+    setTimeout(() => document.getElementById('pin-input').focus(), 50);
+  }
+
+  function submitPin(e) {
+    e.preventDefault();
+    const val = document.getElementById('pin-input').value.trim();
+    if (val === ADMIN_PIN) {
+      isAdmin = true;
+      closeModal();
+      render();
+      if (modalMode === 'pin-for-new')  openNewForm();
+      if (modalMode === 'pin-for-edit') openEditForm(editingId);
+    } else {
+      document.getElementById('pin-error').textContent = 'Incorrect PIN.';
+      document.getElementById('pin-input').value = '';
+      document.getElementById('pin-input').focus();
+    }
+  }
+
+  function lockAdmin() {
+    isAdmin = false;
+    render();
+  }
+
+  // ── New / Edit ────────────────────────────────────────────────
+  function openNewModal() {
+    if (!isAdmin) { modalMode = 'pin-for-new'; requestAdminAccess(); return; }
+    openNewForm();
+  }
+
+  function openNewForm() {
+    editingId = null;
+    modalMode = 'new';
+    document.getElementById('modal-form-title').textContent = 'New Request';
+    document.getElementById('field-company').value   = '';
+    document.getElementById('field-type').value      = 'pre-sales';
+    document.getElementById('field-domain').value    = 'R&D';
+    document.getElementById('field-question').value  = '';
+    document.getElementById('field-sme').value       = '';
+    document.getElementById('field-urgency').value   = 'standard';
+    document.getElementById('field-status').value    = '';
+    document.getElementById('field-notion').value    = '';
+    document.getElementById('modal-overlay').hidden  = false;
+    document.getElementById('modal-pin').hidden      = true;
+    document.getElementById('modal-form').hidden     = false;
+  }
+
+  function openEditModal(id) {
+    if (!isAdmin) { editingId = id; modalMode = 'pin-for-edit'; requestAdminAccess(); return; }
+    openEditForm(id);
+  }
+
+  function openEditForm(id) {
+    editingId = id;
+    modalMode = 'edit';
+    const req = requests.find(r => r.id === id);
+    if (!req) return;
+    document.getElementById('modal-form-title').textContent = 'Update Request';
+    document.getElementById('field-company').value   = req.company;
+    document.getElementById('field-type').value      = req.type;
+    document.getElementById('field-domain').value    = req.domain;
+    document.getElementById('field-question').value  = req.question;
+    document.getElementById('field-sme').value       = req.sme;
+    document.getElementById('field-urgency').value   = req.urgency;
+    document.getElementById('field-status').value    = '';
+    document.getElementById('field-notion').value    = req.notionUrl || '';
+    document.getElementById('modal-overlay').hidden  = false;
+    document.getElementById('modal-pin').hidden      = true;
+    document.getElementById('modal-form').hidden     = false;
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').hidden = true;
+    document.getElementById('modal-pin').hidden     = true;
+    document.getElementById('modal-form').hidden    = true;
+    modalMode = null;
+  }
+
+  function saveRequest(e) {
+    e.preventDefault();
+    const company   = document.getElementById('field-company').value.trim();
+    const type      = document.getElementById('field-type').value;
+    const domain    = document.getElementById('field-domain').value;
+    const question  = document.getElementById('field-question').value.trim();
+    const sme       = document.getElementById('field-sme').value.trim();
+    const urgency   = document.getElementById('field-urgency').value;
+    const status    = document.getElementById('field-status').value;
+    const notionUrl = document.getElementById('field-notion').value.trim();
+    if (!company || !question) return;
+
+    if (editingId) {
+      const req = requests.find(r => r.id === editingId);
+      Object.assign(req, { company, type, domain, question, sme, urgency, notionUrl });
+      if (status && status !== req.status) {
+        req.status = status;
+        const ts = new Date().toISOString();
+        if (status === 'acknowledged' && !req.acknowledgedAt) req.acknowledgedAt = ts;
+        if (status === 'answered'     && !req.answeredAt)     req.answeredAt     = ts;
+        if (status === 'escalated'    && !req.escalatedAt)    req.escalatedAt    = ts;
+        if (status === 'resolved'     && !req.resolvedAt)     req.resolvedAt     = ts;
+      }
+    } else {
+      requests.unshift({
+        id: 'req-' + String(Date.now()).slice(-6),
+        company, type, domain, question, sme, urgency, notionUrl,
+        owner: 'Richard Johnson',
+        postedAt: new Date().toISOString(),
+        status: 'pending',
+        acknowledgedAt: null, answeredAt: null, resolvedAt: null, escalatedAt: null, etaDate: null,
+        target: SLA.acknowledge,
+      });
+    }
+    closeModal();
+    render();
+  }
+
+  function markResolved(id) {
+    const req = requests.find(r => r.id === id);
+    if (!req) return;
+    req.status = 'resolved';
+    req.resolvedAt = new Date().toISOString();
+    render();
+  }
+</script>
+
+<!-- ── DOM ──────────────────────────────────────────────────────── -->
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="header-title">Deep Origin <span>/ Enterprise Support</span></div>
+      <div class="header-subtitle">Live SLA tracker · read-only · data source: Notion</div>
+    </div>
+    <div class="header-stats">
+      <span class="stat-chip ok"><span id="stat-open">–</span></span>
+      <span class="stat-chip warn" id="stat-risk-chip" hidden><span id="stat-risk">–</span></span>
+      <span class="stat-chip crit" id="stat-breach-chip" hidden><span id="stat-breach">–</span></span>
+      <span class="stat-chip esc"  id="stat-esc-chip"   hidden><span id="stat-esc">–</span></span>
+    </div>
+    <div class="header-actions">
+      <button class="btn" id="admin-lock-prompt" onclick="requestAdminAccess()">Admin</button>
+      <button class="btn primary" id="admin-new-btn" onclick="openNewModal()" hidden>+ New Request</button>
+    </div>
+  </div>
+</header>
+
+<!-- Admin mode banner (only visible when unlocked) -->
+<div class="admin-banner" id="admin-banner" hidden>
+  <div class="admin-banner-inner">
+    <span class="admin-banner-text">Admin mode active — you can add and update requests</span>
+    <button class="admin-lock-btn" onclick="lockAdmin()">Lock</button>
+  </div>
+</div>
+
+<!-- System note bar -->
+<div class="system-note">
+  <div class="system-note-inner">
+    <span class="note-item"><span class="note-dot slack"></span>Requests enter via #enterprise-support in Slack</span>
+    <span class="note-item"><span class="note-dot" style="background:var(--ok)"></span>Answers happen in the email thread (enterprise@ inbox)</span>
+    <span class="note-item"><span class="note-dot notion"></span>Full Q&A log lives in Notion</span>
+    <span class="note-item"><span class="note-dot jira"></span>Jira integration planned — manual update until then</span>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Filter</span>
+  <button class="filter-btn active" data-filter="all"          onclick="setFilter('all')">All</button>
+  <button class="filter-btn"        data-filter="open"         onclick="setFilter('open')">Open</button>
+  <button class="filter-btn"        data-filter="pending"      onclick="setFilter('pending')">Pending</button>
+  <button class="filter-btn"        data-filter="acknowledged" onclick="setFilter('acknowledged')">Acknowledged</button>
+  <button class="filter-btn"        data-filter="escalated"    onclick="setFilter('escalated')">Escalated</button>
+  <button class="filter-btn"        data-filter="answered"     onclick="setFilter('answered')">Answered</button>
+</div>
+
+<main class="main">
+  <div class="cards" id="cards-container"></div>
+
+  <div class="legend">
+    <div class="legend-header">
+      <span class="legend-title">SLA Thresholds</span>
+      <span class="legend-note">Clock tracks acknowledgment &amp; update cadence, not raw time</span>
+    </div>
+    <div class="legend-rows">
+      <div class="legend-row">
+        <div class="legend-stripe ok"></div>
+        <div class="legend-text">
+          <div class="legend-threshold">T+4h — Acknowledge</div>
+          <div class="legend-desc">Owner confirms in Slack thread, opens email thread to enterprise@ with rep + SME CC'd. Customer notified with ETA.</div>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-stripe warn"></div>
+        <div class="legend-text">
+          <div class="legend-threshold">T+1 BD — Substantive answer or dated ETA</div>
+          <div class="legend-desc">Owner posts in email thread: a full answer, or an information request with a hard return date. Rep relays to customer.</div>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-stripe crit"></div>
+        <div class="legend-text">
+          <div class="legend-threshold">T+2 BD — Resolution or CTA</div>
+          <div class="legend-desc">Answer, workaround, or a concrete named next step with a date. Missing a stated ETA triggers escalation immediately.</div>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-stripe escalated"></div>
+        <div class="legend-text">
+          <div class="legend-threshold">T+36h → Tim / Natalie / Henk &nbsp;·&nbsp; T+48h → Michael (CEO)</div>
+          <div class="legend-desc">Escalation is triggered by a missed ETA or a gap in update cadence — not automatically by elapsed time alone.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ── Modals ────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay" hidden onclick="if(event.target===this)closeModal()">
+
+  <!-- PIN prompt -->
+  <div class="modal" id="modal-pin" hidden>
+    <div class="modal-title">Admin access</div>
+    <div class="modal-desc">Enter the admin PIN to add or update requests. Everyone else can view the dashboard but cannot make changes.</div>
+    <form onsubmit="submitPin(event)">
+      <div class="field">
+        <label for="pin-input">PIN</label>
+        <input id="pin-input" type="password" autocomplete="off" placeholder="••••">
+        <span class="field-error" id="pin-error"></span>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn primary">Unlock</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Request form -->
+  <div class="modal" id="modal-form" hidden>
+    <div class="modal-title" id="modal-form-title">New Request</div>
+    <form id="req-form" onsubmit="saveRequest(event)">
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="field">
+            <label for="field-company">Company</label>
+            <input id="field-company" type="text" placeholder="e.g. Pfizer BD" required>
+          </div>
+          <div class="field">
+            <label for="field-type">Type</label>
+            <select id="field-type">
+              <option value="pre-sales">Pre-sales</option>
+              <option value="post-sale">Post-sale</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="field-domain">Domain</label>
+            <select id="field-domain">
+              <option>R&D</option>
+              <option>Product</option>
+              <option>Engineering</option>
+              <option>Commercial</option>
+              <option>Sales</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="field-urgency">Urgency</label>
+            <select id="field-urgency">
+              <option value="standard">Standard</option>
+              <option value="elevated">Elevated</option>
+            </select>
+          </div>
+        </div>
+        <div class="field full">
+          <label for="field-question">Question / Request</label>
+          <textarea id="field-question" placeholder="What the customer asked, verbatim if possible" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="field-sme">Domain SME</label>
+            <input id="field-sme" type="text" placeholder="e.g. Hayk Saribekyan">
+          </div>
+          <div class="field">
+            <label for="field-status">Update Status</label>
+            <select id="field-status">
+              <option value="">— no change —</option>
+              <option value="pending">Pending</option>
+              <option value="acknowledged">Acknowledged</option>
+              <option value="answered">Answered</option>
+              <option value="escalated">Escalated</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+        </div>
+        <div class="field full">
+          <label for="field-notion">Notion URL (optional)</label>
+          <input id="field-notion" type="url" placeholder="https://notion.so/...">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<script>render();</script>
+
+</body></html>
